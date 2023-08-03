@@ -30,12 +30,14 @@ export class ControlPanelPage implements OnInit {
   loadEmployees() {
     this.employees$ = this.authService.getEmployee().pipe(
       tap((employees) => console.log(employees)), // Log the response
+      
       catchError((error) => {
         console.log('Error fetching Employee information:', error); // Log any error
         return []; // Return an empty array as an Observable in case of an error
       })
     );
   }
+  
 
   // Function to show the add employee form
   showAddEmployeeForm() {
@@ -60,7 +62,7 @@ export class ControlPanelPage implements OnInit {
 
   // Function to delete an employee
   deleteEmployee(employee: any) {
-    this.authService.deleteEmployee(employee.id).subscribe(() => {
+    this.authService.deleteEmployee(employee._id).subscribe(() => {
       // Reload the employee list after successful deletion
       this.loadEmployees();
     });
@@ -72,5 +74,7 @@ export class ControlPanelPage implements OnInit {
     this.showAddForm = false;
     this.showEditForm = false;
   }
+  
 }
+
 
