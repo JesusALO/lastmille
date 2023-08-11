@@ -23,9 +23,9 @@
         <ion-card-content *ngIf="customers" class="scrollable-content">
           <div class="item-container" *ngFor="let customer of customers" style="display: flex;">
             <h2>{{ customer.contact_name }}</h2>
-            <div class="item-property">{{ customer.customer.default_address.address }}, {{ customer.customer.default_address.number }}, {{ customer.customer.default_address.locality }}</div>
+            <div class="item-property">{{ customer.customer.default_address.address }}, {{ customer.customer.default_address.number }}, {{ customer.customer.default_address.locality }}, {{ customer.customer.default_address.city }}</div>
             <div class="item-property">{{ customer.customer.total_spent }}, {{ customer.customer.total_spent_currency }}</div>
-            <ion-checkbox [(ngModel)]="customer.selected"></ion-checkbox>
+            <ion-checkbox slot="start" [value]="customer.customer" (ionChange)="toggleValue($event, customer.customer.default_address.address, customer.customer.default_address.number,customer.customer.default_address.locality)"></ion-checkbox>
           </div>
         </ion-card-content>
         <ion-card class="total">
