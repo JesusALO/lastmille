@@ -1,12 +1,7 @@
-/*import { Component, OnInit, ViewChild, ElementRef} from '@angular/core';*/
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../auth.service';
 import { NavController } from '@ionic/angular';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
-import { catchError } from 'rxjs/operators';
-import { throwError } from 'rxjs';
-
 
 @Component({
   selector: 'app-orders',
@@ -14,48 +9,21 @@ import { throwError } from 'rxjs';
   styleUrls: ['./orders.page.scss'],
 })
 export class OrdersPage implements OnInit {
-  jsonData: any[] = [];
-  orders: any[] = [];
   customers: any[] = [];
-
-  fetchOrders() {
-    console.log();
-    this.http.get('<https://api.tiendanube.com/v1/3378902/orders?fields=id,contact_name,contact_phone,customer>')
-      .pipe(
-        catchError((error) => {
-          console.error('Error fetching orders:', error);
-          return throwError(error);
-        })
-      )
-      .subscribe((data: any) => {
-        this.orders = data;
-      });
-  }
-  
-  
-  calculateTotalPrice(){
-    let totalPrice = 0;
-    for (let order of this.jsonData){
-      totalPrice += order.price;
-    }
-    return totalPrice;
-  }
+  addresses: any[] = [];
+  city: string = ',Chihuahua';
 
   constructor(
     private authService: AuthService, 
     private navCtrl: NavController, 
-    private router: Router,
-    private http: HttpClient
-    ) { }
-
-  confirm() {
-    this.router.navigate(['/confirmed-orders']);
-  }
+    private router: Router
+    ) {}
 
   ngOnInit(): void {
     this.authService.getCustomer().subscribe(
       (data: any[]) => {
-        this.customers = data;
+        // Add a 'selected' property to each customer
+        this.customers = data.map(customer => ({ ...customer, selected: false }));
       },
       (error) => {
         console.log('Error fetching customer information:', error);
@@ -63,4 +31,71 @@ export class OrdersPage implements OnInit {
     );
   }
 
+  addAddress(address,number,locality){
+    let _address = `${address}, ${number}, ${locality}`;
+    this.addresses.push(_address);
+    console.log(this.addresses);
+  }
+
+  toggleValue(event: any,address:string,number:string,locality:string) {
+    const valueToAdd = `${address}, ${number}, ${locality} ${this.city}`;
+    
+
+    if (event.detail.checked) {
+      // If checkbox is checked and value isn't in array, add it
+      if (!this.addresses.includes(valueToAdd)) {
+        this.addresses.push(valueToAdd);
+      }
+    } else {
+      // If checkbox is unchecked, remove the value from array
+      const index = this.addresses.indexOf(valueToAdd);
+      if (index > -1) {
+        this.addresses.splice(index, 1);
+      }
+    }
+
+    console.log(this.addresses); // Just for debugging
+  }
+
+////////////////////////////////////////////////////////////////////77
+
+
+
+  calculateTotalPrice() {
+    // Calculate total price based on selected customers
+    const selectedCustomers = this.customers.filter(customer => customer.selected);
+    let totalPrice = 0;
+    for (const customer of selectedCustomers) {
+      totalPrice += parseFloat(customer.customer.total_spent);
+    }
+    return totalPrice.toFixed(2);
+  }
+
+
+  createRoute() {
+    const selectedCustomers = this.customers.filter(customer => customer.selected);
+    const selectedWaypoints = selectedCustomers.map(customer => {
+      const address = customer.customer.default_address.address;
+      const num = customer.customer.default_address.number;
+      const locality = customer.customer.default_address.locality;
+      const city = customer.customer.default_address.city;
+/*       const currLocation = `${address}, ${num}, ${locality} Chihuahua`;
+      localStorage.setItem('selectedLocation', currLocation); */
+      let addressArray =  JSON.stringify(this.addresses);
+      localStorage.setItem('selectedLocations', addressArray);
+
+      return `${address}, ${num}, ${locality}, ${city}`;
+    });
+
+    let navigationExtras = {
+      state: {
+        locations:  this.addresses
+      }
+    };
+
+    this.router.navigate(['/map'], navigationExtras);
+  }
 }
+
+
+

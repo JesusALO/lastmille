@@ -38,7 +38,6 @@
       <ion-item class="employee-card" *ngFor="let employee of (employees$ | async)">
         <ion-label>
           <h3>{{ employee.firstName }} {{ employee.lastName }}</h3>
-          <p>ID: {{ employee.id }}</p>
           <p>Email: {{ employee.email }}</p>
           <p>Phone: {{ employee.phoneNumber }}</p>
           <p>Address: {{ employee.address }}</p>
@@ -54,7 +53,9 @@
   </div>
 
   <!-- Add new employee form -->
-  <ion-card *ngIf="showAddForm || showEditForm">
+  
+
+  <ion-card *ngIf="showAddForm">
     <ion-card-header>
       <ion-card-title>{{ showAddForm ? 'Add New Employee' : 'Edit Employee' }}</ion-card-title>
     </ion-card-header>
@@ -86,6 +87,42 @@
         </ion-item>
       </ion-list>
       <ion-button (click)="saveEmployee()">{{ showAddForm ? 'Add' : 'Save' }}</ion-button>
+      <ion-button (click)="cancelForm()">Cancel</ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="showEditForm">
+    <ion-card-header>
+      <ion-card-title>{{ showAddForm ? 'Add New Employee' : 'Edit Employee' }}</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-list>
+        <ion-item>
+          <ion-label position="stacked">First Name</ion-label>
+          <ion-input [(ngModel)]="employee.firstName" placeholder="First Name"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="stacked">Last Name</ion-label>
+          <ion-input [(ngModel)]="employee.lastName" placeholder="Last Name"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="stacked">Phone Number</ion-label>
+          <ion-input [(ngModel)]="employee.phoneNumber" placeholder="Phone Number"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="stacked">Address</ion-label>
+          <ion-input [(ngModel)]="employee.address" placeholder="Address"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="stacked">Email</ion-label>
+          <ion-input [(ngModel)]="employee.email" placeholder="Email"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="stacked">Password</ion-label>
+          <ion-input [(ngModel)]="employee.password" placeholder="Password"></ion-input>
+        </ion-item>
+      </ion-list>
+      <ion-button (click)="updateEmployee()">Update</ion-button>
       <ion-button (click)="cancelForm()">Cancel</ion-button>
     </ion-card-content>
   </ion-card>

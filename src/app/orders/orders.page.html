@@ -16,21 +16,21 @@
     <ion-card class="form-card">
       <ion-card-header>
         <h1 class="scrip-to-customer" style="color:rgb(58, 58, 58)">Hola Luis,</h1>
-        <h2 class="scrip-to-customer2">tu orden</h2>
-        <h3 class="scrip-to-customer3">llegará en aprox.</h3>
+        <h3 class="scrip-to-customer3">Ordenes pendientes.</h3>
       </ion-card-header>
       <h4 class="customer-products">Incluye</h4>
       <div class="square-container">
         <ion-card-content *ngIf="customers" class="scrollable-content">
           <div class="item-container" *ngFor="let customer of customers" style="display: flex;">
             <h2>{{ customer.contact_name }}</h2>
-            <div class="item-property">{{ customer.customer.default_address }}</div>
-            <div class="item-property">{{ customer.total_spent }}</div>
+            <div class="item-property">{{ customer.customer.default_address.address }}, {{ customer.customer.default_address.number }}, {{ customer.customer.default_address.locality }}, {{ customer.customer.default_address.city }}</div>
+            <div class="item-property">{{ customer.customer.total_spent }}, {{ customer.customer.total_spent_currency }}</div>
+            <ion-checkbox slot="start" [value]="customer.customer" (ionChange)="toggleValue($event, customer.customer.default_address.address, customer.customer.default_address.number,customer.customer.default_address.locality)"></ion-checkbox>
           </div>
         </ion-card-content>
         <ion-card class="total">
           <p>Total: {{ calculateTotalPrice() }}</p>
-          <ion-button (click)="confirm()">Confirm Order</ion-button>
+          <ion-button (click)="createRoute()">Confirm Order</ion-button>
         </ion-card>
       </div>
     </ion-card>

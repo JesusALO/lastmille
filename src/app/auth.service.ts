@@ -57,6 +57,16 @@ export class AuthService {
     );
   }
 
+  updateEmployee(employeeId: string, updatedData: any): Observable<any> {
+    const url = `${this.baseUrl}/updateDriverInfo/${employeeId}`; // Replace '/updateDriverInfo/:id' with the appropriate API endpoint for updating employee information
+    return this.http.patch<any>(url, updatedData).pipe(
+      catchError((error) => {
+        console.log('Error updating employee:', error); // Log any error
+        return throwError(error); // Rethrow the error
+      })
+    );
+  }
+
   deleteEmployee(employeeId: string): Observable<any> {
     const url = `${this.baseUrl}/deleteDriver/${employeeId}`; // Replace '/deleteDriver/:id' with the appropriate API endpoint for deleting employees
     return this.http.delete<any>(url).pipe(

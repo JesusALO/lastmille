@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router  } from '@angular/router';
 declare var google: any;
 
 @Component({
@@ -7,17 +8,49 @@ declare var google: any;
   styleUrls: ['./map.page.scss'],
 })
 export class MapPage implements OnInit {
+  public currLocations: any[] = [];
   private directionsService: any;
   map: any;
-  private currentPositionMarker: any;
+  waypoints: any[] = [];
   private directionsRenderer: any;
-  private waypoints: any[] = [];
+  private currentPositionMarker: any;
   private currentLocationInterval: any;
   estimatedTravelTimes: string[] = [];
+  selectedWaypoint: string;
+
+  constructor(
+    private activatedRoute: ActivatedRoute, // Inject ActivatedRoute
+    private router: Router // Inject Router
+  ) {
+
+    this.activatedRoute.queryParams.subscribe(params => {
+      if (this.router.getCurrentNavigation().extras.state) {
+        let receivedLocations = this.router.getCurrentNavigation().extras.state['locations'];
+        console.log(receivedLocations);
+        this.currLocations = receivedLocations;
+      }
+    });
+  
+
+  }
 
 
   ngOnInit() {
     this.initializeMap();
+    this.currLocations = JSON.parse(localStorage.getItem('selectedLocations') || '[]');
+    
+    console.log(this.currLocations);
+  
+    // Retrieve waypoints from route state
+    this.activatedRoute.queryParams.subscribe(params => {
+      const state = this.router.getCurrentNavigation()?.extras.state;
+      if (state && state['waypoints']) {  // Access 'waypoints' using square brackets
+        this.waypoints = state['waypoints'];  // Access 'waypoints' using square brackets
+        
+        this.addCurrentLocationWaypoint(); // Add current location as the first waypoint
+      }
+    });
+  
   }
 
   public initializeMap() {
@@ -33,118 +66,106 @@ export class MapPage implements OnInit {
     this.directionsRenderer = new google.maps.DirectionsRenderer({ map: map });
     this.map = map;
 
-    // Add click event listener to allow setting waypoints
-    google.maps.event.addListener(this.map, 'click', (event: any) => {
-      this.addWaypoint(event.latLng);
-    });
-  }
-
-  
-
-  public addWaypointFromSearch() {
-    const input = document.getElementById('search-input') as HTMLInputElement;
-    const address = input.value;
-  
-    if (address.trim() !== '') {
-      this.geocodeLocation(address)
-        .then((location: any) => {
-          this.addWaypoint(location);
-          input.value = ''; // Clear the search input
-        })
-        .catch((error: any) => {
-          console.log('Geocoding error:', error);
+    if(this.currLocations){
+      for (const address of this.currLocations) {
+        this.geocodeAddress(address).then(location => {
+            new google.maps.Marker({
+                map: this.map,
+                position: location
+            });
+        }).catch(error => {
+            console.error('Error placing marker for address:', address, 'Error:', error);
         });
     }
+    }
+
+
   }
-  
 
-
-  private geocodeLocation(address: string): Promise<any> {
+  geocodeAddress(address: string): Promise<any> {
     return new Promise((resolve, reject) => {
-      const geocoder = new google.maps.Geocoder();
-      geocoder.geocode({ address }, (results: any, status: any) => {
-        if (status === 'OK' && results && results.length > 0) {
-          resolve(results[0].geometry.location);
-        } else {
-          reject(status);
-        }
-      });
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ 'address': address }, (results, status) => {
+            if (status === 'OK') {
+                resolve(results[0].geometry.location);
+            } else {
+                reject('Geocode was not successful for the following reason: ' + status);
+            }
+        });
+    });
+}
+
+private startUpdatingCurrentLocation() {
+  if (this.currentLocationInterval) {
+    clearInterval(this.currentLocationInterval); // Clear the current location interval if it exists
+  }
+
+  this.currentLocationInterval = setInterval(() => {
+    navigator.geolocation.getCurrentPosition(
+      (position: any) => {
+        const latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+        this.updateCurrentPositionMarker(latLng);
+      },
+      (error: any) => {
+        console.log('Error getting current position:', error.message);
+      }
+    );
+  }, 10000); // Update every 10 seconds
+}
+
+private updateCurrentPositionMarker(latLng: any) {
+  if (this.currentPositionMarker) {
+    this.currentPositionMarker.setPosition(latLng);
+  } else {
+    this.currentPositionMarker = new google.maps.Marker({
+      position: latLng,
+      map: this.map,
     });
   }
-  
+}
 
-  private addWaypoint(latLng: any) {
-    if (this.waypoints.length >= 8) {
-      window.alert('Maximum number of waypoints reached.');
-      return;
-    }
-
-    this.waypoints.push({ location: latLng });
-    this.calculateAndDisplayRoute();
+private calculateAndDisplayRoute() {
+  if (this.waypoints.length < 2) {
+    console.log('Not enough waypoints to calculate route.');
+    return;
   }
 
-  private calculateAndDisplayRoute() {
-    const directionsRequest = {
-      origin: this.waypoints[0]?.location,
-      destination: this.waypoints[this.waypoints.length - 1]?.location,
-      waypoints: this.waypoints.slice(1, -1),
-      optimizeWaypoints: true,
-      travelMode: 'DRIVING',
-    };
-  
-    this.directionsService.route(directionsRequest, (response: any, status: any) => {
-      if (status === 'OK') {
-        this.directionsRenderer.setDirections(response);
-  
-        const legs = response.routes[0].legs;
-  
-        this.estimatedTravelTimes = legs.map((leg: any) => leg.duration.text);
-  
-        this.startUpdatingCurrentLocation();
-      } else {
-        window.alert('Directions request failed due to ' + status);
-      }
-    });
-  }
-  
+  const directionsRequest = {
+    origin: this.waypoints[0]?.location,
+    destination: this.waypoints[this.waypoints.length - 1]?.location,
+    waypoints: this.waypoints.slice(1, -1).map(waypoint => ({ location: waypoint.location })),
+    optimizeWaypoints: true,
+    travelMode: 'DRIVING',
+  };
 
-  private getInstructions(legs: any[]): string[] {
-    const instructions: string[] = [];
-    for (const leg of legs) {
-      const steps = leg.steps;
-      for (let j = 0; j < steps.length; j++) {
-        instructions.push(steps[j].instructions);
-      }
-    }
-    return instructions;
-  }
+  this.directionsService.route(directionsRequest, (response: any, status: any) => {
+    if (status === 'OK') {
+      this.directionsRenderer.setDirections(response);
 
-  private startUpdatingCurrentLocation() {
-    if (this.currentLocationInterval) {
-      clearInterval(this.currentLocationInterval); // Clear the current location interval if it exists
-    }
+      const legs = response.routes[0].legs;
 
-    this.currentLocationInterval = setInterval(() => {
-      navigator.geolocation.getCurrentPosition(
-        (position: any) => {
-          const latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-          this.updateCurrentPositionMarker(latLng);
-        },
-        (error: any) => {
-          console.log('Error getting current position:', error.message);
-        }
-      );
-    }, 1000); // Update every 10 seconds
-  }
+      this.estimatedTravelTimes = legs.map((leg: any) => leg.duration.text);
 
-  private updateCurrentPositionMarker(latLng: any) {
-    if (this.currentPositionMarker) {
-      this.currentPositionMarker.setPosition(latLng);
+      this.startUpdatingCurrentLocation();
     } else {
-      this.currentPositionMarker = new google.maps.Marker({
-        position: latLng,
-        map: this.map,
-      });
+      console.log('Directions request failed due to ' + status);
     }
-  }
+  });
+}
+
+
+private addCurrentLocationWaypoint() {
+  navigator.geolocation.getCurrentPosition(
+    (position: any) => {
+      const latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+      this.waypoints.unshift({ location: latLng }); // Add current location as the first waypoint
+      this.calculateAndDisplayRoute();
+    },
+    (error: any) => {
+      console.log('Error getting current position:', error.message);
+    }
+  );
+}
+
+
 }
