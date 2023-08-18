@@ -11,5 +11,7 @@ export class ConfirmedOrdersPage implements OnInit {
 
   ngOnInit() {
   }
-
+  ETA() {
+    
+  }
 }
