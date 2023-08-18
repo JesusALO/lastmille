@@ -29,6 +29,7 @@
     "@googlemaps/google-maps-services-js": "^3.3.31",
     "@ionic/angular": "^7.0.13",
     "@ionic/core": "^7.0.13",
+    "@ionic/storage-angular": "^4.0.0",
     "@types/googlemaps": "^3.43.3",
     "ionicons": "^7.0.0",
     "rxjs": "~7.8.0",

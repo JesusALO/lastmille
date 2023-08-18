@@ -2,6 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../auth.service';
 import { NavController } from '@ionic/angular';
 import { Router } from '@angular/router';
+import { Storage } from '@ionic/storage-angular';
+import { AlertController } from '@ionic/angular';
+
 
 @Component({
   selector: 'app-signinform',
@@ -13,31 +16,63 @@ export class SigninformPage implements OnInit {
   email:string = '';
   password:string = '';
 
-  constructor(private authService: AuthService, private navCtrl: NavController, private router: Router) { }
+  constructor(private authService: AuthService, private alertController: AlertController, private navCtrl: NavController, private router: Router, private storage: Storage) { }
 
-  ngOnInit() {}
+  async ngOnInit() {
+    await this.storage.create();
+    // await this.retrieveStorkedData();
+  }
 
-  login() {
-
+ login() {
+    
     //this.router.navigate(['/map']);//
-    console.log(this.email, this.password)
+    // console.log(this.email, this.password)
     this.authService.login(this.email, this.password).subscribe(
-      (response) => {
-        this.router.navigate(['/map']);
-        //this.navCtrl.navigateForward('../../map/map.page.html');//
-        // Login successful, handle the response
-        //console.log(loginData.email, loginData.password);
+      async (response) => {
+        // Store the response data
+        // localStorage.setItem('responseData',response._token);
+        await this.storage.set('token', response._token).then(()=>{
+          console.log("token saved");
+        });
+        await this.storage.get('token').then((tk)=>{
+          console.log("token gotten");
+          if(tk){
+            this.router.navigate(['/orders']);
+          }
           
-        console.log("it works");
-        console.log(response);
+        });
+        
+        
+        //await this.storage.get('token');
+        //Move to the route map
+        
+        // Login successful, handle the response
+        // console.log("it works");
       },
-      (error) => {
+      async (error) => {
         // Login failed, handle the error
-        console.log("it does not work");
+        const alert = await this.alertController.create({
+          header: 'Login Failed',
+          message: 'Invalid username or password.',
+          buttons: ['OK']
+        });
+    
+        await alert.present();
+        console.log(error);
         // console.error(error);
       }
       
-    );
-  }
-
+      );
+    }
+  //   async retrieveStoredData() {
+  //     const responseData = await this.storage.get('responseData');
+  //     if (responseData) {
+  //       console.log("Stored response data is:", responseData);
+  //     // Do something with the retrieved data
+  //   } else {
+  //     console.log("No stored response data found");
+  //   }
+  // }
+  
+  
 }
