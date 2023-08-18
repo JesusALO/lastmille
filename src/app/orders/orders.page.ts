@@ -95,6 +95,10 @@ export class OrdersPage implements OnInit {
 
     this.router.navigate(['/map'], navigationExtras);
   }
+
+  goToControlPanel() {
+    this.router.navigate(['/control-panel']); // Replace 'control-panel' with the actual path
+  }
 }
 
 
