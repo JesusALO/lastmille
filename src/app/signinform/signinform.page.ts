@@ -28,7 +28,7 @@ export class SigninformPage implements OnInit {
         // Login successful, handle the response
         //console.log(loginData.email, loginData.password);
           
-        console.log("it works");
+        console.log("it works perfectly");
         console.log(response);
       },
       (error) => {
