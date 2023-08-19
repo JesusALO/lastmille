@@ -24,7 +24,21 @@ export class AuthService {
 
     return this.http.post(`${this.baseUrl}/login`, loginData, httpOptions);
   }
+  sendSMS(): Observable<any> {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json'
+      })
+    };
 
+    return this.http.post(`${this.baseUrl}/send-sms`, {}, httpOptions).pipe(
+      tap((response) => console.log('SMS sent:', response)),
+      catchError((error) => {
+        console.log('Error sending SMS:', error);
+        return throwError(error);
+      })
+    );
+  }
   getCustomer(): Observable<any> {
     const url = `${this.baseUrl}/deliveryInfo`; // Replace '/customerInfo' with the appropriate API endpoint for customer information
     return this.http.get<any>(url).pipe(

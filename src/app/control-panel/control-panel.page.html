@@ -1,36 +1,5 @@
-<ion-menu contentId="main-content">
-  <ion-header>
-    <ion-toolbar>
-      <ion-title>Sidebar</ion-title>
-    </ion-toolbar>
-  </ion-header>
-  <ion-content>
-    <div class="profile">
-      <!-- Profile picture and name -->
-      <ion-img src="path/to/profile-picture.jpg" alt="User Profile"></ion-img>
-      <p>User Name</p>
-    </div>
-    <ion-list>
-      <!-- Sidebar buttons -->
-      <ion-item>
-        <ion-label>Home</ion-label>
-      </ion-item>
-      <ion-item>
-        <ion-label>Employees</ion-label>
-      </ion-item>
-      <ion-item>
-        <ion-label>Settings</ion-label>
-      </ion-item>
-      <ion-item>
-        <ion-label>Log Out</ion-label>
-      </ion-item>
-    </ion-list>
-  </ion-content>
-</ion-menu>
-
 <ion-content id="main-content">
   <!-- Main content -->
-  <ion-button expand="full" (click)="toggleSidebar()">(͡° ͜ʖ ͡°)</ion-button>
   <div class="main-content">
     <h2>Employees</h2>
     <ion-list class="employee-list">
@@ -48,8 +17,9 @@
         </ion-buttons>
       </ion-item>
     </ion-list>
-    <!-- Add new employee button -->
+    <ion-button color="secondary" class="add-btn"(click)="goToOrders()">Go back to Orders</ion-button>
     <ion-button class="add-btn" (click)="showAddEmployeeForm()">Add New Employee</ion-button>
+    <!-- Add new employee button -->
   </div>
 
   <!-- Add new employee form -->

@@ -33,7 +33,6 @@ const routes: Routes = [
   },
   {
     path: 'confirmed-orders',
-    // canActivate:[AuthGuard],
     loadChildren: () => import('./confirmed-orders/confirmed-orders.module').then( m => m.ConfirmedOrdersPageModule)
   },
   {

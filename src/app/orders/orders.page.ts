@@ -30,6 +30,18 @@ export class OrdersPage implements OnInit {
       }
     );
   }
+  sendSMS() {
+    this.authService.sendSMS().subscribe(
+      () => {
+        console.log('SMS sent successfully');
+        // You can add any logic here after the SMS is successfully sent
+      },
+      (error) => {
+        console.error('Error sending SMS:', error);
+        // You can handle the error here if needed
+      }
+    );
+  }
 
   addAddress(address,number,locality){
     let _address = `${address}, ${number}, ${locality}`;
@@ -95,7 +107,9 @@ export class OrdersPage implements OnInit {
 
     this.router.navigate(['/map'], navigationExtras);
   }
+
+  goToControlPanel() {
+    this.router.navigate(['/control-panel']); // Replace 'control-panel' with the actual path
+  }
+  
 }
-
-
-

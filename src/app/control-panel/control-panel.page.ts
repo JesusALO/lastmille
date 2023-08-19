@@ -3,6 +3,7 @@ import { MenuController } from '@ionic/angular';
 import { AuthService } from 'path-to-auth-service'; // Replace 'path-to-auth-service' with the correct path to your auth service
 import { Observable } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-control-panel',
@@ -15,7 +16,7 @@ export class ControlPanelPage implements OnInit {
   showAddForm = false;
   showEditForm = false;
 
-  constructor(private menuController: MenuController, private authService: AuthService) {}
+  constructor(private menuController: MenuController, private authService: AuthService,private router: Router) {}
 
   ngOnInit() {
     this.loadEmployees();
@@ -81,6 +82,9 @@ export class ControlPanelPage implements OnInit {
     this.employee = {};
     this.showAddForm = false;
     this.showEditForm = false;
+  }
+  goToOrders() {
+    this.router.navigate(['/orders']); // Replace 'orders' with the actual path
   }
   
 }
